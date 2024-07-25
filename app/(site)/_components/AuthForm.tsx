@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isValid, z } from 'zod'
 
 import { Button } from '@/components/ui/button'
+import axios from 'axios'
 import {
   Form,
   FormControl,
@@ -18,11 +19,12 @@ import {
 import { Input } from '@/components/ui/input'
 import AuthSocialButton from './AuthSocialButton'
 import { BsGithub, BsGoogle } from 'react-icons/bs'
+import { signIn, useSession } from 'next-auth/react'
+import toast from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Username é obrigatório.',
-  }),
+  name: z.string().optional(),
   email: z.string().min(2, {
     message: 'Email é obrigatório.',
   }),
@@ -33,8 +35,16 @@ const formSchema = z.object({
 
 type Variant = 'LOGIN' | 'REGISTER'
 const AuthForm = () => {
+  const session = useSession()
+  const router = useRouter()
   const [variant, setVariant] = useState<Variant>('LOGIN')
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (session?.status === 'authenticated') {
+      router.push('/users')
+    }
+  }, [session?.status, router])
 
   const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') {
@@ -55,23 +65,57 @@ const AuthForm = () => {
   })
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
-    if (variant === 'REGISTER') {
-      // axios regiser
-    }
+    console.log('ENTROU!!!')
 
-    if (variant === 'LOGIN') {
-      // NextAuth SignIn
+    try {
+      if (variant === 'REGISTER') {
+        axios
+          .post('/api/register', data)
+          .then(() => signIn('credentials', data))
+          .catch(() => toast.error('Something webt wrong'))
+          .finally(() => setIsLoading(false))
+      }
+
+      if (variant === 'LOGIN') {
+        signIn('credentials', {
+          ...data,
+          redirect: false,
+        })
+          .then((callback) => {
+            if (callback?.error) {
+              toast.error('Invalid credentials')
+            }
+
+            if (callback?.ok && !callback?.error) {
+              toast.success('Logged in!')
+            }
+          })
+          .finally(() => setIsLoading(false))
+      }
+    } catch (err) {
+      console.log(err)
     }
-    console.log(values)
   }
 
   const socialAction = (action: string) => {
     setIsLoading(true)
 
-    // NextAuth Social Sign In
+    signIn(action, {
+      redirect: false,
+    })
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error('Invalid Credentials')
+        }
+
+        if (callback?.ok && !callback?.error) {
+          toast.success('Logged in!')
+        }
+      })
+      .finally(() => setIsLoading(false))
   }
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -114,7 +158,7 @@ const AuthForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isLoading} />
+                    <Input {...field} type="password" disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +169,7 @@ const AuthForm = () => {
               disabled={isLoading || !isValid}
               className="w-full"
             >
-              Sign in
+              {variant === 'LOGIN' ? 'Sign in' : 'Sign up'}
             </Button>
           </form>
         </Form>
