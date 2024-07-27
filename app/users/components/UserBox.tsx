@@ -16,7 +16,6 @@ const UserBox = ({ data }: UserBoxProps) => {
 
   const handleClick = useCallback(() => {
     setIsLoading(true)
-
     axios
       .post('/api/conversations', {
         userId: data.id,
