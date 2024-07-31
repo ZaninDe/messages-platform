@@ -12,7 +12,6 @@ interface MessageInputProps {
 }
 
 const MessageInput = ({
-  errors,
   id,
   register,
   placeholder,

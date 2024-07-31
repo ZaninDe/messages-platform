@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 'use client'
 
 import useConversation from '@/app/hooks/useConversation'
@@ -16,7 +18,6 @@ const Body = ({ initialMessages }: BodyProps) => {
   const { conversationId } = useConversation()
 
   useEffect(() => {
-    console.log('EU VI A MSG!!!')
     axios.post(`/api/conversations/${conversationId}/seen`)
   }, [conversationId])
 
