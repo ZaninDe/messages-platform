@@ -4,7 +4,6 @@ import EmptyState from '@/components/EmptyState'
 import Header from './components/Header'
 import Body from './components/Body'
 import Form from './components/Form'
-import LoadingModal from '@/components/LoadingModal'
 interface IParams {
   conversationId: string
 }

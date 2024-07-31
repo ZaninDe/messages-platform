@@ -7,14 +7,6 @@ import { useState } from 'react'
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import Select from '@/components/Select'
 import { Button } from '@/components/ui/button'
@@ -29,13 +21,7 @@ const GroupChatModal = ({ users, isOpen, onClose }: GroupChatModalProps) => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<FieldValues>({
+  const { register, handleSubmit, setValue, watch } = useForm<FieldValues>({
     defaultValues: {
       name: '',
       members: [],
