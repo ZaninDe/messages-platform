@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 'use client'
 
 import { Conversation, User } from '@prisma/client'
@@ -16,6 +17,7 @@ import Avatar from '@/components/Avatar'
 import { IoTrash } from 'react-icons/io5'
 import ConfirmModal from './ConfirmModal'
 import AvatarGroup from '@/components/AvatarGroup'
+import useActiveList from '@/app/hooks/useActiveList'
 
 interface ProfileDrawerProps {
   isOpen: boolean
@@ -27,6 +29,8 @@ interface ProfileDrawerProps {
 const ProfileDrawer = ({ isOpen, onClose, data }: ProfileDrawerProps) => {
   const otherUser = useOtherUser(data)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { members } = useActiveList()
+  const isActive = members.lastIndexOf(otherUser?.email!) !== -1
 
   const joinedDate = useMemo(() => {
     return format(new Date(otherUser.createdAt), 'PP')
@@ -41,8 +45,8 @@ const ProfileDrawer = ({ isOpen, onClose, data }: ProfileDrawerProps) => {
       return `${data.users.length} members`
     }
 
-    return 'Active'
-  }, [data])
+    return isActive ? 'Active' : 'Offline'
+  }, [data, isActive])
 
   const handleCloseModal = () => {
     if (isModalOpen) {

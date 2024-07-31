@@ -1,5 +1,6 @@
 import getCurrentUser from '@/app/actions/getCurrentUser'
 import { db } from '@/app/libs/prismadb'
+import { pusherServer } from '@/lib/pusher'
 import { NextResponse } from 'next/server'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -39,6 +40,16 @@ export async function DELETE(
           hasSome: [currentUser.id],
         },
       },
+    })
+
+    existingConversation.users.forEach((user) => {
+      if (user.email) {
+        pusherServer.trigger(
+          user.email,
+          'conversation:remove',
+          existingConversation,
+        )
+      }
     })
 
     return NextResponse.json(deletedConversation)
